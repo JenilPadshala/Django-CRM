@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from .models import Lead, Agent
-from .forms import LeadForm
+from .forms import LeadForm, LeadModelForm
 # Create your views here.
 def lead_list(request):
     #return HttpResponse("Hello World")
@@ -20,24 +20,12 @@ def lead_detail(request, pk):
     return render(request, "leads/lead_detail.html", context)
 
 def lead_create(request):
-    form = LeadForm()
+    form = LeadModelForm()
     if request.method == "POST":
         print('Receiving a post request')
-        form = LeadForm(request.POST) #returned back the form values
+        form = LeadModelForm(request.POST) #returned back the form values
         if form.is_valid():
-            print("The form is valid")
-            print(form.cleaned_data)
-            first_name = form.cleaned_data['first_name']
-            last_name = form.cleaned_data['last_name']
-            age = form.cleaned_data['age']
-            agent = Agent.objects.first()
-            Lead.objects.create(
-                first_name=first_name,
-                last_name = last_name,
-                age = age,
-                agent = agent
-            )
-            print("The lead has been created")
+            form.save()         #saves each value of the form from the cleaned_data dictionary
             return redirect("/leads")
     context = {
         "form": form
