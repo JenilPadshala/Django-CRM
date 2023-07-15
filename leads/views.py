@@ -22,7 +22,6 @@ def lead_detail(request, pk):
 def lead_create(request):
     form = LeadModelForm()
     if request.method == "POST":
-        print('Receiving a post request')
         form = LeadModelForm(request.POST) #returned back the form values
         if form.is_valid():
             form.save()         #saves each value of the form from the cleaned_data dictionary
@@ -31,3 +30,34 @@ def lead_create(request):
         "form": form
     }
     return render(request,"leads/lead_create.html", context)
+
+def lead_update(request, pk):
+    lead = Lead.objects.get(id=pk)
+    form = LeadModelForm(instance=lead)
+    if request.method == "POST":
+        form = LeadModelForm(request.POST, instance=lead) #returned back the form values
+        if form.is_valid():
+            form.save()         #saves each value of the form from the cleaned_data dictionary
+            return redirect("/leads")
+    context = {
+         "lead": lead,
+         "form": form
+     }
+    return render(request, "leads/lead_update.html", context)
+# def lead_update(request, pk):
+#     lead = Lead.objects.get(id=pk)
+#     form = LeadForm()
+#     if request.method == "POST":
+#         form = LeadForm(request.POST)
+#         if form.is_valid():
+#              lead.first_name = form.cleaned_data['first_name']
+#             lead.last_name = form.cleaned_data['last_name']
+#             lead.age = form.cleaned_data['age']
+#             lead.save()
+#             return redirect("/leads")
+
+#     context = {
+#         "lead": lead,
+#         "form": form
+#     }
+#     return render(request, "leads/lead_update.html", context)
