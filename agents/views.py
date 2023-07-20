@@ -1,3 +1,5 @@
+from typing import Any
+from django.db import models
 from django.forms.models import BaseModelForm
 from django.http import HttpResponse
 from django.views import generic
@@ -9,7 +11,8 @@ class AgentListView(LoginRequiredMixin, generic.ListView):
     template_name = "agents/agent_list.html"
     
     def get_queryset(self):
-        return Agent.objects.all()
+        request_organisation = self.request.user.userprofile
+        return Agent.objects.filter(organisation = request_organisation)
 
 class AgentCreateView(LoginRequiredMixin, generic.CreateView):
     template_name = "agents/agent_create.html"
@@ -23,3 +26,32 @@ class AgentCreateView(LoginRequiredMixin, generic.CreateView):
         agent.organisation = self.request.user.userprofile
         agent.save()
         return super(AgentCreateView, self).form_valid(form)
+    
+class AgentDetailView(generic.DetailView):
+    template_name = "agents/agent_detail.html"
+    context_object_name = 'agent'
+    def get_queryset(self):
+        request_organisation = self.request.user.userprofile
+        return Agent.objects.filter(organisation = request_organisation)
+    
+class AgentUpdateView(LoginRequiredMixin, generic.UpdateView):
+    template_name = "agents/agent_update.html"
+    form_class = AgentModelForm
+
+    def get_success_url(self):
+        return reverse("agents:agent-list")
+    
+    def get_queryset(self):
+        request_organisation = self.request.user.userprofile
+        return Agent.objects.filter(organisation = request_organisation)
+    
+class AgentDeleteView(LoginRequiredMixin, generic.DeleteView):
+    template_name = "agents/agent_delete.html"
+    context_object_name = "agent"
+
+    def get_queryset(self):
+        return Agent.objects.all()
+    
+    def get_queryset(self):
+        request_organisation = self.request.user.userprofile
+        return Agent.objects.filter(organisation = request_organisation)
