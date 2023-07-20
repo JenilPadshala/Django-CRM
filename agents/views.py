@@ -3,18 +3,23 @@ from django.db import models
 from django.forms.models import BaseModelForm
 from django.http import HttpResponse
 from django.views import generic
-from django.contrib.auth.mixins import LoginRequiredMixin
+#from django.contrib.auth.mixins import LoginRequiredMixin
 from leads.models import Agent
 from django.shortcuts import reverse
 from .forms import AgentModelForm
-class AgentListView(LoginRequiredMixin, generic.ListView):
+from .mixins import OrganiserAndLoginRequiredMixin
+
+
+
+
+class AgentListView(OrganiserAndLoginRequiredMixin, generic.ListView):
     template_name = "agents/agent_list.html"
     
     def get_queryset(self):
         request_organisation = self.request.user.userprofile
         return Agent.objects.filter(organisation = request_organisation)
 
-class AgentCreateView(LoginRequiredMixin, generic.CreateView):
+class AgentCreateView(OrganiserAndLoginRequiredMixin, generic.CreateView):
     template_name = "agents/agent_create.html"
     form_class = AgentModelForm
 
@@ -27,14 +32,14 @@ class AgentCreateView(LoginRequiredMixin, generic.CreateView):
         agent.save()
         return super(AgentCreateView, self).form_valid(form)
     
-class AgentDetailView(generic.DetailView):
+class AgentDetailView(OrganiserAndLoginRequiredMixin, generic.DetailView):
     template_name = "agents/agent_detail.html"
     context_object_name = 'agent'
     def get_queryset(self):
         request_organisation = self.request.user.userprofile
         return Agent.objects.filter(organisation = request_organisation)
     
-class AgentUpdateView(LoginRequiredMixin, generic.UpdateView):
+class AgentUpdateView(OrganiserAndLoginRequiredMixin, generic.UpdateView):
     template_name = "agents/agent_update.html"
     form_class = AgentModelForm
 
@@ -45,7 +50,7 @@ class AgentUpdateView(LoginRequiredMixin, generic.UpdateView):
         request_organisation = self.request.user.userprofile
         return Agent.objects.filter(organisation = request_organisation)
     
-class AgentDeleteView(LoginRequiredMixin, generic.DeleteView):
+class AgentDeleteView(OrganiserAndLoginRequiredMixin, generic.DeleteView):
     template_name = "agents/agent_delete.html"
     context_object_name = "agent"
 
