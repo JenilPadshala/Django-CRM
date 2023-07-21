@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Dict
 from django.db.models.query import QuerySet
 from django.shortcuts import render, redirect, reverse
 from django.http import HttpResponse
@@ -39,12 +39,23 @@ class LeadListView(LoginRequiredMixin, generic.ListView):
 
         # initial queryset of leads for the entire organisation
         if user.is_organiser:
-            queryset = Lead.objects.filter(organisation=user.userprofile)
+            queryset = Lead.objects.filter(organisation=user.userprofile, agent__isnull=False)
         else:
             queryset = Lead.objects.filter(organisation=user.agent.organisation)
             #filter for the agent that is logged in
             queryset = queryset.filter(agent__user=user)
         return queryset
+    
+    def get_context_data(self, **kwargs: Any):
+        user=self.request.user
+        context = super(LeadListView, self). get_context_data(**kwargs)
+        if user.is_organiser:
+            queryset = Lead.objects.filter(organisation=user.userprofile, agent__isnull=True)
+            context.update({
+                "unassigned_leads":queryset
+
+            })
+        return context
 
 def lead_list(request):
     #return HttpResponse("Hello World")
